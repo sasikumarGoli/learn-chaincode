@@ -40,13 +40,41 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
 
-	err := stub.PutState("hello_ibm", []byte(args[0]))
+	err := stub.PutState("table_ibm", []byte(args[0]))
 	if err != nil {
 		return nil, err
 	}
 
+	
+	// Check if table already exists
+	_, err = stub.GetTable("EmpTable")
+	if err == nil {
+		// Table already exists; do not recreate
+		return nil, nil
+	}
+     fmt.Println("ready to create the table: ")
+	// Create application Table
+	err = stub.CreateTable("EmpTable", []*shim.ColumnDefinition{
+		&shim.ColumnDefinition{Name: "empId", Type: shim.ColumnDefinition_STRING, Key: true},
+		&shim.ColumnDefinition{Name: "name", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "title", Type: shim.ColumnDefinition_STRING, Key: false},
+		
+	})
+	if err != nil {
+		return nil, errors.New("Failed creating ApplicationTable.")
+	}
+	
+	
+	fmt.Println("table created: ")
+	
+	
+	
+	
+	
+	
+	
 	return nil, nil
-}
+	}
 
 // Invoke isur entry point to invoke a chaincode function
 func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
