@@ -19,13 +19,27 @@ package main
 import (
 	"errors"
 	"fmt"
+	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	
 )
 
 // SimpleChaincode example simple Chaincode implementation
 type SimpleChaincode struct {
 }
+
+type Emp struct{	
+	empId string `json:"empId"`
+	name string `json:"name"`
+	title string `json:"title"`
+
+
+}
+
+
+
+
 
 func main() {
 	err := shim.Start(new(SimpleChaincode))
@@ -40,39 +54,14 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
 
-	err := stub.PutState("table_ibm", []byte(args[0]))
+	err := stub.PutState("table_ibminsert", []byte(args[0]))
 	if err != nil {
 		return nil, err
 	}
 
 	
-	// Check if table already exists
-	_, err = stub.GetTable("EmpTable")
-	if err == nil {
-		// Table already exists; do not recreate
-		return nil, nil
-	}
-     fmt.Println("ready to create the table: ")
-	// Create application Table
-	err = stub.CreateTable("EmpTable", []*shim.ColumnDefinition{
-		&shim.ColumnDefinition{Name: "empId", Type: shim.ColumnDefinition_STRING, Key: true},
-		&shim.ColumnDefinition{Name: "name", Type: shim.ColumnDefinition_STRING, Key: false},
-		&shim.ColumnDefinition{Name: "title", Type: shim.ColumnDefinition_STRING, Key: false},
-		
-	})
-	if err != nil {
-		return nil, errors.New("Failed creating ApplicationTable.")
-	}
 	
-	
-	fmt.Println("table created: ")
-	
-	
-	
-	
-	
-	
-	
+
 	return nil, nil
 	}
 
@@ -88,11 +77,44 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	}
 	fmt.Println("invoke did not find func: " + function)
 
+	if function == "submitEmp" {
+		if len(args) != 3 {
+			return nil, fmt.Errorf("Incorrect number of arguments. Expecting 20. Got: %d.", len(args))
+		}
+		
+		empId := args[0]
+		name := args[1]
+		title := args[2]
+		
+		
+		//insert a row
+		
+		ok, err := stub.InsertRow("EmpTable", shim.Row{
+		Columns: []*shim.Column{
+				&shim.Column{Value: &shim.Column_String_{String_: empId}},
+				&shim.Column{Value: &shim.Column_String_{String_: name}},
+				&shim.Column{Value: &shim.Column_String_{String_: title}},
+				}})
+	
+	if !ok && err == nil {
+			return nil, errors.New("Row already exists.")
+		}
+	
+	}
+	fmt.Println("values Inserted in the table: ")
+	
+	
+	
+	
 	return nil, errors.New("Received unknown function invocation: " + function)
 }
 
+
+
 // Query is our entry point for queries
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	
+	
 	fmt.Println("query is running " + function)
 
 	// Handle different functions
@@ -103,6 +125,10 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 
 	return nil, errors.New("Received unknown function query: " + function)
 }
+
+
+
+
 
 // write - invoke function to write key/value pair
 func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -125,19 +151,37 @@ func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string)
 
 // read - query function to read key/value pair
 func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var key, jsonResp string
-	var err error
-
+	
+	
 	if len(args) != 1 {
-		return nil, errors.New("Incorrect number of arguments. Expecting name of the key to query")
+		return nil, errors.New("Incorrect number of arguments. Expecting applicationid to query")
 	}
+	
+	empId := args[0]
 
-	key = args[0]
-	valAsbytes, err := stub.GetState(key)
+
+
+// Get the row pertaining to this applicationId
+	var columns []shim.Column
+	col1 := shim.Column{Value: &shim.Column_String_{String_: empId}}
+	columns = append(columns, col1)
+	
+	
+	row, err := stub.GetRow("EmpTable", columns)
 	if err != nil {
-		jsonResp = "{\"Error\":\"Failed to get state for " + key + "\"}"
+		jsonResp := "{\"Error\":\"Failed to get the data for the dataaa " + empId + "\"}"
 		return nil, errors.New(jsonResp)
 	}
-
-	return valAsbytes, nil
+	
+	res2E := Emp{}
+	
+	
+	res2E.empId = row.Columns[0].GetString_()
+	res2E.name = row.Columns[1].GetString_()
+	res2E.title = row.Columns[2].GetString_()
+	
+	mapB, _ := json.Marshal(res2E)
+    fmt.Println(string(mapB))
+	
+	return mapB, nil
 }
