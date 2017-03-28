@@ -153,9 +153,14 @@ func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string)
 func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	
 	
+	
+	
+	
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting applicationid to query")
 	}
+	
+	fmt.Println("came into read func and geting empid: ")
 	
 	empId := args[0]
 
@@ -173,6 +178,8 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 		return nil, errors.New(jsonResp)
 	}
 	
+	fmt.Println("got the row from table: ")
+	
 	res2E := Emp{}
 	
 	
@@ -180,8 +187,10 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 	res2E.name = row.Columns[1].GetString_()
 	res2E.title = row.Columns[2].GetString_()
 	
+	
 	mapB, _ := json.Marshal(res2E)
-    fmt.Println(string(mapB))
+    
+	fmt.Println(string(mapB))
 	
 	return mapB, nil
 }
