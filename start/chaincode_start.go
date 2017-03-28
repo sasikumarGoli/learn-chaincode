@@ -199,10 +199,13 @@ fmt.Println("came into read func and geting empid: "+empId)
 		return nil, errors.New(jsonResp)
 	}
 	
-	fmt.Println("got the row from table: ")
-	      var x    =     row.Columns[0].GetString_()
+	if len(row.Columns) == 0 || row.Columns[2] == nil {
+		fmt.Println("no rows returned")
+		
+		return nil, errors.New("row or column value not found")
+	}
 	
-	fmt.Println("got the row from table: "+x)
+	
 	//res2E := Emp{}
 	
 	
