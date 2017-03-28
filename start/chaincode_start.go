@@ -19,7 +19,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"encoding/json"
+	//"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	
@@ -50,17 +50,38 @@ func main() {
 
 // Init resets all the things
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	
+	
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
 
-	err := stub.PutState("table_ibminsert", []byte(args[0]))
+	  err := stub.PutState("table_ibminsert", []byte(args[0]))
 	if err != nil {
 		return nil, err
 	}
 
 	
 	
+	// Check if table already exists
+	_,  err = stub.GetTable("EmpTable")
+	
+	if err == nil {
+		// Table already exists; do not recreate
+		return nil, nil
+	}
+     fmt.Println("ready to create the table: ")
+	// Create application Table
+	err = stub.CreateTable("EmpTable", []*shim.ColumnDefinition{
+		&shim.ColumnDefinition{Name: "empId", Type: shim.ColumnDefinition_STRING, Key: true},
+		&shim.ColumnDefinition{Name: "name", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "title", Type: shim.ColumnDefinition_STRING, Key: false},
+		
+	})
+	if err != nil {
+		return nil, errors.New("Failed creating ApplicationTable.")
+		
+	}
 
 	return nil, nil
 	}
@@ -164,7 +185,7 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 	
 	empId := args[0]
 
-
+fmt.Println("came into read func and geting empid: "+empId)
 
 // Get the row pertaining to this applicationId
 	var columns []shim.Column
@@ -179,18 +200,20 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 	}
 	
 	fmt.Println("got the row from table: ")
+	      var x    =     row.Columns[0].GetString_()
 	
-	res2E := Emp{}
-	
-	
-	res2E.empId = row.Columns[0].GetString_()
-	res2E.name = row.Columns[1].GetString_()
-	res2E.title = row.Columns[2].GetString_()
+	fmt.Println("got the row from table: "+x)
+	//res2E := Emp{}
 	
 	
-	mapB, _ := json.Marshal(res2E)
+	//res2E.empId = row.Columns[0].GetString_()
+	//res2E.name = row.Columns[1].GetString_()
+	//res2E.title = row.Columns[2].GetString_()
+	
+	
+	//mapB, _ := json.Marshal(res2E)
     
-	fmt.Println(string(mapB))
+	//fmt.Println(string(mapB))
 	
-	return mapB, nil
+	return nil, nil
 }
