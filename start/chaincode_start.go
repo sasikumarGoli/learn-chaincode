@@ -28,12 +28,7 @@ type EMPInfo struct {
 }
 
 
-type EMPDetails struct {
-	MonthlySalary      int `json:"monthlySalary"`
-	MonthlyRent        int `json:"monthlyRent"`
-	OtherExpenditure   int `json:"otherExpenditure"`
-	
-}
+
 
 
 
