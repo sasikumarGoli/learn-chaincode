@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	//"github.com/hyperledger/fabric/core/crypto/primitives"
+	"github.com/hyperledger/fabric/core/crypto/primitives"
 )
 
 
@@ -160,6 +160,8 @@ func (t *EMP) Query(stub shim.ChaincodeStubInterface, function string, args []st
 
 
 func main() {
+	
+	primitives.SetSecurityLevel("SHA3", 256)
 	
 	err := shim.Start(new(EMP))
 	if err != nil {
