@@ -1,226 +1,406 @@
-/*
-Copyright IBM Corp 2016 All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-		 http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	
+	"github.com/hyperledger/fabric/core/crypto/primitives"
 )
 
-// SimpleChaincode example simple Chaincode implementation
-type SimpleChaincode struct {
-}
 
-type Emp struct{	
-	empId string `json:"empId"`
-	name string `json:"name"`
-	title string `json:"title"`
 
+ 
+// HDFC is a high level smart contract that HDFCs together business artifact based smart contracts
+type HDFC struct {
 
 }
 
+// Application is for storing retreived Application
+
+type Application struct{	
+	ApplicationId string `json:"applicationId"`
+	Status string `json:"status"`
+	Title string `json:"title"`
+	FirstName string `json:"firstName"`
+	LastName string `json:"lastName"`
+	Gender string `json:"gender"`
+	Dob string `json:"dob"`
+	Age string `json:"age"`
+	MartialStatus string `json:"martialStatus"`
+	FatherName string `json:"fatherName"`
+	MotherName string `json:"motherName"`
+	Nationality string `json:"nationality"`
+	ResidentialStatus string `json:"residentialStatus"`
+	PlaceOfBirth string `json:"placeOfBirth"`
+	PanNumber string `json:"panNumber"`
+	AadharNumber string `json:"aadharNumber"`
+	EducationalQualification string `json:"educationalQualification"`
+	PoliticallyExposed string `json:"politicallyExposed"`
+	DisablePersonPolicy string `json:"disablePersonPolicy"`
+	AnyCriminalProceeding string `json:"anyCriminalProceeding"`
+
+}
+
+// ListApplication is for storing retreived Application list with status
+type ListApplication struct{	
+	ApplicationId string `json:"applicationId"`
+	Status string `json:"status"`
+}
 
 // CountApplication is for storing retreived Application count
-type Empppcounter struct{	
-	empCounter int `json:"count"`
+type CountApplication struct{	
+	Count int `json:"count"`
 }
 
+// Init initializes the smart contracts
+func (t *HDFC) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
-
-
-
-func main() {
-	err := shim.Start(new(SimpleChaincode))
-	if err != nil {
-		fmt.Printf("Error starting Simple chaincode: %s", err)
-	}
-}
-
-// Init resets all the things
-func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	
-	
-	if len(args) != 1 {
-		return nil, errors.New("Incorrect number of arguments. Expecting 1")
-	}
-
-	  err := stub.PutState("table_ibminsert", []byte(args[0]))
-	if err != nil {
-		return nil, err
-	}
-
-	
-	
 	// Check if table already exists
-	_,  err = stub.GetTable("EmpTable")
-	
+	_, err := stub.GetTable("ApplicationTable")
 	if err == nil {
 		// Table already exists; do not recreate
 		return nil, nil
 	}
-     fmt.Println("ready to create the table: ")
+
 	// Create application Table
-	err = stub.CreateTable("EmpTable", []*shim.ColumnDefinition{
-		&shim.ColumnDefinition{Name: "empId", Type: shim.ColumnDefinition_STRING, Key: true},
-		&shim.ColumnDefinition{Name: "name", Type: shim.ColumnDefinition_STRING, Key: false},
+	err = stub.CreateTable("ApplicationTable", []*shim.ColumnDefinition{
+		&shim.ColumnDefinition{Name: "applicationId", Type: shim.ColumnDefinition_STRING, Key: true},
+		&shim.ColumnDefinition{Name: "status", Type: shim.ColumnDefinition_STRING, Key: false},
 		&shim.ColumnDefinition{Name: "title", Type: shim.ColumnDefinition_STRING, Key: false},
-		
+		&shim.ColumnDefinition{Name: "firstName", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "lastName", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "gender", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "dob", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "age", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "martialStatus", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "fatherName", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "motherName", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "nationality", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "residentialStatus", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "placeOfBirth", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "panNumber", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "aadharNumber", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "educationalQualification", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "politicallyExposed", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "disablePersonPolicy", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "anyCriminalProceeding", Type: shim.ColumnDefinition_STRING, Key: false},
 	})
 	if err != nil {
 		return nil, errors.New("Failed creating ApplicationTable.")
-		
 	}
-
-	return nil, nil
-	}
-
-// Invoke isur entry point to invoke a chaincode function
-func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	fmt.Println("invoke is running " + function)
-
-	// Handle different functions
-	if function == "init" {
-		return t.Init(stub, "init", args)
-	} else if function == "write" {
-		return t.write(stub, args)
-	}
-	fmt.Println("invoke did not find func: " + function)
-
-	if function == "submitEmp" {
-		if len(args) != 3 {
-			return nil, fmt.Errorf("Incorrect number of arguments. Expecting 20. Got: %d.", len(args))
-		}
-		
-		empId := args[0]
-		name := args[1]
-		title := args[2]
-		fmt.Println("values Inserted in the table: empid"+empId)
-		fmt.Println("values Inserted in the table: name"+name)
-		fmt.Println("values Inserted in the table: empid"+title)
-		
-		
-		
-		//insert a row
-		
-		ok, err := stub.InsertRow("EmpTable", shim.Row{
-		Columns: []*shim.Column{
-				&shim.Column{Value: &shim.Column_String_{String_: empId}},
-				&shim.Column{Value: &shim.Column_String_{String_: name}},
-				&shim.Column{Value: &shim.Column_String_{String_: title}},
-				}})
 	
-	if !ok && err == nil {
-			return nil, errors.New("Row already exists.")
-		}
-	
-	}
-	fmt.Println("values Inserted in the table: ")
-	
-	
-	
-	
-	return nil, errors.New("Received unknown function invocation: " + function)
-}
-
-
-
-// Query is our entry point for queries
-func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	
-	
-	fmt.Println("query is running " + function)
-
-	// Handle different functions
-	if function == "read" { //read a variable
-		
-		t := SimpleChaincode{}
-		return t.read(stub, args)
-	}
-	fmt.Println("query did not find func: " + function)
-
-	return nil, errors.New("Received unknown function query: " + function)
-}
-
-
-
-
-
-// write - invoke function to write key/value pair
-func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var key, value string
-	var err error
-	fmt.Println("running write()")
-
-	if len(args) != 2 {
-		return nil, errors.New("Incorrect number of arguments. Expecting 2. name of the key and value to set")
-	}
-
-	key = args[0] //rename for funsies
-	value = args[1]
-	err = stub.PutState(key, []byte(value)) //write the variable into the chaincode state
-	if err != nil {
-		return nil, err
-	}
 	return nil, nil
 }
 
-// read - query function to read key/value pair
-func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	
-	
-	
-	
-	
-	if len(args) != 1 {
-		return nil, errors.New("Incorrect number of arguments. Expecting applicationid to query")
+
+func (t *HDFC) getNumApplications(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 0.")
 	}
-	
-	fmt.Println("came into read func and geting empid: ")
-	
-	empId := args[0]
-
-fmt.Println("came into read func and geting empid: "+empId)
-
 
 	var columns []shim.Column
-	emplCounter := 0
-	
-	rows, err := stub.GetRows("EmpTable", columns)
-	
+
+	contractCounter := 0
+
+	rows, err := stub.GetRows("ApplicationTable", columns)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to retrieve row")
 	}
-	
-	
+
 	for row := range rows {
 		if len(row.Columns) != 0 {
-			emplCounter++
+			contractCounter++
 		}
 	}
-	
-	res2E := Empppcounter{}
-	res2E.empCounter = emplCounter
+
+	res2E := CountApplication{}
+	res2E.Count = contractCounter
 	mapB, _ := json.Marshal(res2E)
     fmt.Println(string(mapB))
 	
 	return mapB, nil
-		
 }
+
+
+func (t *HDFC) UpdateStatus(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2.")
+	}
+
+	applicationId := args[0]
+	newStatus := args[1]
+
+	// Get the row pertaining to this applicationId
+	var columns []shim.Column
+	col1 := shim.Column{Value: &shim.Column_String_{String_: applicationId}}
+	columns = append(columns, col1)
+
+	row, err := stub.GetRow("ApplicationTable", columns)
+	if err != nil {
+		return nil, fmt.Errorf("Error: Failed retrieving application with applicationId %s. Error %s", applicationId, err.Error())
+	}
+
+	// GetRows returns empty message if key does not exist
+	if len(row.Columns) == 0 {
+		return nil, nil
+	}
+
+
+	//currStatus := row.Columns[1].GetString_()
+
+
+
+	//End- Check that the currentStatus to newStatus transition is accurate
+	// Delete the row pertaining to this applicationId
+	err = stub.DeleteRow(
+		"ApplicationTable",
+		columns,
+	)
+	if err != nil {
+		return nil, errors.New("Failed deleting row.")
+	}
+
+	//applicationId := row.Columns[0].GetString_()
+	status := newStatus
+	title := row.Columns[2].GetString_()
+	firstName := row.Columns[3].GetString_()
+	lastName := row.Columns[4].GetString_()
+	gender := row.Columns[5].GetString_()
+	dob := row.Columns[6].GetString_()
+	age := row.Columns[7].GetString_()
+	martialStatus := row.Columns[8].GetString_()
+	fatherName := row.Columns[9].GetString_()
+	motherName := row.Columns[10].GetString_()
+	nationality := row.Columns[11].GetString_()
+	residentialStatus := row.Columns[12].GetString_()
+	placeOfBirth := row.Columns[13].GetString_()
+	panNumber := row.Columns[14].GetString_()
+	aadharNumber := row.Columns[15].GetString_()
+	educationalQualification := row.Columns[16].GetString_()
+	politicallyExposed := row.Columns[17].GetString_()
+	disablePersonPolicy := row.Columns[18].GetString_()
+	anyCriminalProceeding := row.Columns[19].GetString_()
+	
+	//Insert the row pertaining to this applicationId with new status
+	_, err = stub.InsertRow(
+		"ApplicationTable",
+		shim.Row{
+			Columns: []*shim.Column{
+				&shim.Column{Value: &shim.Column_String_{String_: applicationId}},
+				&shim.Column{Value: &shim.Column_String_{String_: status}},
+				&shim.Column{Value: &shim.Column_String_{String_: title}},
+				&shim.Column{Value: &shim.Column_String_{String_: firstName}},
+				&shim.Column{Value: &shim.Column_String_{String_: lastName}},
+				&shim.Column{Value: &shim.Column_String_{String_: gender}},
+				&shim.Column{Value: &shim.Column_String_{String_: dob}},
+				&shim.Column{Value: &shim.Column_String_{String_: age}},
+				&shim.Column{Value: &shim.Column_String_{String_: martialStatus}},
+				&shim.Column{Value: &shim.Column_String_{String_: fatherName}},
+				&shim.Column{Value: &shim.Column_String_{String_: motherName}},
+				&shim.Column{Value: &shim.Column_String_{String_: nationality}},
+				&shim.Column{Value: &shim.Column_String_{String_: residentialStatus}},
+				&shim.Column{Value: &shim.Column_String_{String_: placeOfBirth}},
+				&shim.Column{Value: &shim.Column_String_{String_: panNumber}},
+				&shim.Column{Value: &shim.Column_String_{String_: aadharNumber}},
+				&shim.Column{Value: &shim.Column_String_{String_: educationalQualification}},
+				&shim.Column{Value: &shim.Column_String_{String_: politicallyExposed}},
+				&shim.Column{Value: &shim.Column_String_{String_: disablePersonPolicy}},
+				&shim.Column{Value: &shim.Column_String_{String_: anyCriminalProceeding}}},
+		})
+	if err != nil {
+		return nil, errors.New("Failed inserting row.")
+	}
+
+	return nil, nil
+
+}
+
+func (t *HDFC) getApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	if len(args) != 1 {
+		return nil, errors.New("Incorrect number of arguments. Expecting applicationid to query")
+	}
+
+	applicationId := args[0]
+	
+
+	// Get the row pertaining to this applicationId
+	var columns []shim.Column
+	col1 := shim.Column{Value: &shim.Column_String_{String_: applicationId}}
+	columns = append(columns, col1)
+
+	row, err := stub.GetRow("ApplicationTable", columns)
+	if err != nil {
+		jsonResp := "{\"Error\":\"Failed to get the data for the application " + applicationId + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	// GetRows returns empty message if key does not exist
+	if len(row.Columns) == 0 {
+		jsonResp := "{\"Error\":\"Failed to get the data for the application " + applicationId + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	
+	
+	res2E := Application{}
+	
+	res2E.ApplicationId = row.Columns[0].GetString_()
+	res2E.Status = row.Columns[1].GetString_()
+	res2E.Title = row.Columns[2].GetString_()
+	res2E.FirstName = row.Columns[3].GetString_()
+	res2E.LastName = row.Columns[4].GetString_()
+	res2E.Gender = row.Columns[5].GetString_()
+	res2E.Dob = row.Columns[6].GetString_()
+	res2E.Age = row.Columns[7].GetString_()
+	res2E.MartialStatus = row.Columns[8].GetString_()
+	res2E.FatherName = row.Columns[9].GetString_()
+	res2E.MotherName = row.Columns[10].GetString_()
+	res2E.Nationality = row.Columns[11].GetString_()
+	res2E.ResidentialStatus = row.Columns[12].GetString_()
+	res2E.PlaceOfBirth = row.Columns[13].GetString_()
+	res2E.PanNumber = row.Columns[14].GetString_()
+	res2E.AadharNumber = row.Columns[15].GetString_()
+	res2E.EducationalQualification = row.Columns[16].GetString_()
+	res2E.PoliticallyExposed = row.Columns[17].GetString_()
+	res2E.DisablePersonPolicy = row.Columns[18].GetString_()
+	res2E.AnyCriminalProceeding = row.Columns[19].GetString_()
+	
+    mapB, _ := json.Marshal(res2E)
+    fmt.Println(string(mapB))
+	
+	return mapB, nil
+
+}
+
+
+
+func (t *HDFC) listAllApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 0.")
+	}
+
+	var columns []shim.Column
+
+	rows, err := stub.GetRows("ApplicationTable", columns)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve row")
+	}
+
+	res2E:= []*ListApplication{}	
+	
+	for row := range rows {
+		newApp:= new(ListApplication)
+		newApp.ApplicationId = row.Columns[0].GetString_()
+		newApp.Status = row.Columns[1].GetString_()
+		res2E=append(res2E,newApp)
+	}
+	
+	res2F, _ := json.Marshal(res2E)
+    fmt.Println(string(res2F))
+	return res2F, nil
+
+}
+
+
+
+// Invoke invokes the chaincode
+func (t *HDFC) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+
+	if function == "submitApplication" {
+		if len(args) != 20 {
+			return nil, fmt.Errorf("Incorrect number of arguments. Expecting 20. Got: %d.", len(args))
+		}
+
+		applicationId := args[0]
+		status := args[1]
+		title := args[2]
+		firstName := args[3]
+		lastName := args[4]
+		gender := args[5]
+		dob := args[6]
+		age := args[7]
+		martialStatus := args[8]
+		fatherName := args[9]
+		motherName := args[10]
+		nationality := args[11]
+		residentialStatus := args[12]
+		placeOfBirth := args[13]
+		panNumber := args[14]
+		aadharNumber := args[15]
+		educationalQualification := args[16]
+		politicallyExposed := args[17]
+		disablePersonPolicy := args[18]
+		anyCriminalProceeding := args[19]
+
+		// Insert a row
+		ok, err := stub.InsertRow("ApplicationTable", shim.Row{
+			Columns: []*shim.Column{
+				&shim.Column{Value: &shim.Column_String_{String_: applicationId}},
+				&shim.Column{Value: &shim.Column_String_{String_: status}},
+				&shim.Column{Value: &shim.Column_String_{String_: title}},
+				&shim.Column{Value: &shim.Column_String_{String_: firstName}},
+				&shim.Column{Value: &shim.Column_String_{String_: lastName}},
+				&shim.Column{Value: &shim.Column_String_{String_: gender}},
+				&shim.Column{Value: &shim.Column_String_{String_: dob}},
+				&shim.Column{Value: &shim.Column_String_{String_: age}},
+				&shim.Column{Value: &shim.Column_String_{String_: martialStatus}},
+				&shim.Column{Value: &shim.Column_String_{String_: fatherName}},
+				&shim.Column{Value: &shim.Column_String_{String_: motherName}},
+				&shim.Column{Value: &shim.Column_String_{String_: nationality}},
+				&shim.Column{Value: &shim.Column_String_{String_: residentialStatus}},
+				&shim.Column{Value: &shim.Column_String_{String_: placeOfBirth}},
+				&shim.Column{Value: &shim.Column_String_{String_: panNumber}},
+				&shim.Column{Value: &shim.Column_String_{String_: aadharNumber}},
+				&shim.Column{Value: &shim.Column_String_{String_: educationalQualification}},
+				&shim.Column{Value: &shim.Column_String_{String_: politicallyExposed}},
+				&shim.Column{Value: &shim.Column_String_{String_: disablePersonPolicy}},
+				&shim.Column{Value: &shim.Column_String_{String_: anyCriminalProceeding}},
+			}})
+
+		if err != nil {
+			return nil, err 
+		}
+		if !ok && err == nil {
+			return nil, errors.New("Row already exists.")
+		}
+
+		return nil, err
+	} else if function == "updateApplicationStatus" { 
+		t := HDFC{}
+		return t.UpdateStatus(stub, args)
+	} 
+
+	return nil, errors.New("Invalid invoke function name.")
+
+}
+
+func (t *HDFC) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+
+	if function == "getApplication" {
+		if len(args) != 1 {
+			return nil, errors.New("Incorrect number of arguments. Expecting applicationid to query")
+		}
+		t := HDFC{}
+		return t.getApplication(stub, args)		
+	}else if function == "listAllApplication" { 
+		t := HDFC{}
+		return t.listAllApplication(stub, args)
+	}else if function == "getNumApplications" { 
+		t := HDFC{}
+		return t.getNumApplications(stub, args)
+	}
+	
+	return nil, nil
+}
+
+func main() {
+	primitives.SetSecurityLevel("SHA3", 256)
+	err := shim.Start(new(HDFC))
+	if err != nil {
+		fmt.Printf("Error starting HDFC: %s", err)
+	}
+} 
