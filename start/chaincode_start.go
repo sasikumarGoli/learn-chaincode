@@ -82,7 +82,7 @@ func (t *HDFC) Init(stub shim.ChaincodeStubInterface, function string, args []st
 	}
 	
 	return nil, nil
-}
+ }
 
 
 
@@ -219,7 +219,7 @@ func (t *HDFC) Invoke(stub shim.ChaincodeStubInterface, function string, args []
 }
 
 
-
+   
 
 func (t *HDFC) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
@@ -240,4 +240,4 @@ func main() {
 	if err != nil {
 		fmt.Printf("Error starting HDFC: %s", err)
 	}
-} 
+ } 
