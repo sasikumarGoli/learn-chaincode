@@ -11,11 +11,13 @@ import (
 
 
 
+ 
 // HDFC is a high level smart contract that HDFCs together business artifact based smart contracts
 type HDFC struct {
 
 }
 
+// Application is for storing retreived Application
 
 type Application struct{	
 	ApplicationId string `json:"applicationId"`
@@ -41,10 +43,18 @@ type Application struct{
 
 }
 
+// ListApplication is for storing retreived Application list with status
+type ListApplication struct{	
+	ApplicationId string `json:"applicationId"`
+	Status string `json:"status"`
+}
 
+// CountApplication is for storing retreived Application count
+type CountApplication struct{	
+	Count int `json:"count"`
+}
 
-
-
+// Init initializes the smart contracts
 func (t *HDFC) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	// Check if table already exists
@@ -82,13 +92,131 @@ func (t *HDFC) Init(stub shim.ChaincodeStubInterface, function string, args []st
 	}
 	
 	return nil, nil
- }
+}
+
+
+func (t *HDFC) getNumApplications(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 0.")
+	}
+
+	var columns []shim.Column
+
+	contractCounter := 0
+
+	rows, err := stub.GetRows("ApplicationTable", columns)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve row")
+	}
+
+	for row := range rows {
+		if len(row.Columns) != 0 {
+			contractCounter++
+		}
+	}
+
+	res2E := CountApplication{}
+	res2E.Count = contractCounter
+	mapB, _ := json.Marshal(res2E)
+    fmt.Println(string(mapB))
+	
+	return mapB, nil
+}
+
+
+func (t *HDFC) UpdateStatus(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2.")
+	}
+
+	applicationId := args[0]
+	newStatus := args[1]
+
+	// Get the row pertaining to this applicationId
+	var columns []shim.Column
+	col1 := shim.Column{Value: &shim.Column_String_{String_: applicationId}}
+	columns = append(columns, col1)
+
+	row, err := stub.GetRow("ApplicationTable", columns)
+	if err != nil {
+		return nil, fmt.Errorf("Error: Failed retrieving application with applicationId %s. Error %s", applicationId, err.Error())
+	}
+
+	// GetRows returns empty message if key does not exist
+	if len(row.Columns) == 0 {
+		return nil, nil
+	}
+
+
+	//currStatus := row.Columns[1].GetString_()
 
 
 
+	//End- Check that the currentStatus to newStatus transition is accurate
+	// Delete the row pertaining to this applicationId
+	err = stub.DeleteRow(
+		"ApplicationTable",
+		columns,
+	)
+	if err != nil {
+		return nil, errors.New("Failed deleting row.")
+	}
 
+	//applicationId := row.Columns[0].GetString_()
+	status := newStatus
+	title := row.Columns[2].GetString_()
+	firstName := row.Columns[3].GetString_()
+	lastName := row.Columns[4].GetString_()
+	gender := row.Columns[5].GetString_()
+	dob := row.Columns[6].GetString_()
+	age := row.Columns[7].GetString_()
+	martialStatus := row.Columns[8].GetString_()
+	fatherName := row.Columns[9].GetString_()
+	motherName := row.Columns[10].GetString_()
+	nationality := row.Columns[11].GetString_()
+	residentialStatus := row.Columns[12].GetString_()
+	placeOfBirth := row.Columns[13].GetString_()
+	panNumber := row.Columns[14].GetString_()
+	aadharNumber := row.Columns[15].GetString_()
+	educationalQualification := row.Columns[16].GetString_()
+	politicallyExposed := row.Columns[17].GetString_()
+	disablePersonPolicy := row.Columns[18].GetString_()
+	anyCriminalProceeding := row.Columns[19].GetString_()
+	
+	//Insert the row pertaining to this applicationId with new status
+	_, err = stub.InsertRow(
+		"ApplicationTable",
+		shim.Row{
+			Columns: []*shim.Column{
+				&shim.Column{Value: &shim.Column_String_{String_: applicationId}},
+				&shim.Column{Value: &shim.Column_String_{String_: status}},
+				&shim.Column{Value: &shim.Column_String_{String_: title}},
+				&shim.Column{Value: &shim.Column_String_{String_: firstName}},
+				&shim.Column{Value: &shim.Column_String_{String_: lastName}},
+				&shim.Column{Value: &shim.Column_String_{String_: gender}},
+				&shim.Column{Value: &shim.Column_String_{String_: dob}},
+				&shim.Column{Value: &shim.Column_String_{String_: age}},
+				&shim.Column{Value: &shim.Column_String_{String_: martialStatus}},
+				&shim.Column{Value: &shim.Column_String_{String_: fatherName}},
+				&shim.Column{Value: &shim.Column_String_{String_: motherName}},
+				&shim.Column{Value: &shim.Column_String_{String_: nationality}},
+				&shim.Column{Value: &shim.Column_String_{String_: residentialStatus}},
+				&shim.Column{Value: &shim.Column_String_{String_: placeOfBirth}},
+				&shim.Column{Value: &shim.Column_String_{String_: panNumber}},
+				&shim.Column{Value: &shim.Column_String_{String_: aadharNumber}},
+				&shim.Column{Value: &shim.Column_String_{String_: educationalQualification}},
+				&shim.Column{Value: &shim.Column_String_{String_: politicallyExposed}},
+				&shim.Column{Value: &shim.Column_String_{String_: disablePersonPolicy}},
+				&shim.Column{Value: &shim.Column_String_{String_: anyCriminalProceeding}}},
+		})
+	if err != nil {
+		return nil, errors.New("Failed inserting row.")
+	}
 
+	return nil, nil
 
+}
 
 func (t *HDFC) getApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
@@ -150,7 +278,36 @@ func (t *HDFC) getApplication(stub shim.ChaincodeStubInterface, args []string) (
 
 
 
+func (t *HDFC) listAllApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 0.")
+	}
 
+	var columns []shim.Column
+
+	rows, err := stub.GetRows("ApplicationTable", columns)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve row")
+	}
+
+	res2E:= []*ListApplication{}	
+	
+	for row := range rows {
+		newApp:= new(ListApplication)
+		newApp.ApplicationId = row.Columns[0].GetString_()
+		newApp.Status = row.Columns[1].GetString_()
+		res2E=append(res2E,newApp)
+	}
+	
+	res2F, _ := json.Marshal(res2E)
+    fmt.Println(string(res2F))
+	return res2F, nil
+
+}
+
+
+
+// Invoke invokes the chaincode
 func (t *HDFC) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	if function == "submitApplication" {
@@ -212,14 +369,14 @@ func (t *HDFC) Invoke(stub shim.ChaincodeStubInterface, function string, args []
 		}
 
 		return nil, err
+	} else if function == "updateApplicationStatus" { 
+		t := HDFC{}
+		return t.UpdateStatus(stub, args)
 	} 
 
 	return nil, errors.New("Invalid invoke function name.")
 
 }
-
-
-   
 
 func (t *HDFC) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
@@ -229,6 +386,12 @@ func (t *HDFC) Query(stub shim.ChaincodeStubInterface, function string, args []s
 		}
 		t := HDFC{}
 		return t.getApplication(stub, args)		
+	}else if function == "listAllApplication" { 
+		t := HDFC{}
+		return t.listAllApplication(stub, args)
+	}else if function == "getNumApplications" { 
+		t := HDFC{}
+		return t.getNumApplications(stub, args)
 	}
 	
 	return nil, nil
@@ -240,4 +403,4 @@ func main() {
 	if err != nil {
 		fmt.Printf("Error starting HDFC: %s", err)
 	}
- } 
+} 
