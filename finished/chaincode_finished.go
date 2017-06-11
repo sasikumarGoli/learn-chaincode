@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+      s "strings"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -37,14 +38,20 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		if len(args) < 3 {
 			return nil, errors.New("insertTableOne failed. Must include 3 column values")
 		}
-
-		col1Val := args[0]
-		col2Int, err := strconv.ParseInt(args[1], 10, 32)
+     var str [] string
+		
+		for i := 0; i < len(args); i++ {
+		
+		str = s.Split(args[i],"-")
+		
+		
+		col1Val := str[0]
+		col2Int, err := strconv.ParseInt(str[1], 10, 32)
 		if err != nil {
 			return nil, errors.New("insertTableOne failed. arg[1] must be convertable to int32")
 		}
 		col2Val := int32(col2Int)
-		col3Int, err := strconv.ParseInt(args[2], 10, 32)
+		col3Int, err := strconv.ParseInt(str[2], 10, 32)
 		if err != nil {
 			return nil, errors.New("insertTableOne failed. arg[2] must be convertable to int32")
 		}
@@ -66,7 +73,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		if !ok {
 			return nil, errors.New("insertTableOne operation failed. Row with given key already exists")
 		}
-
+       
+	   
+	   }
 
 	case "replaceRowTableOne":
 		if len(args) < 3 {
