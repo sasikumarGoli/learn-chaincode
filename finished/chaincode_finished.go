@@ -176,7 +176,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 
          }
 
-         rowChannel, err := stub.GetRows("tableTwo", columns)
+         rowChannel, err := stub.GetRows("tableOne", columns)
 
         if err != nil {
 			return nil, fmt.Errorf("getRowsTableTwo operation failed. %s", err)
