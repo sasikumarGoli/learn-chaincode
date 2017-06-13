@@ -16,6 +16,18 @@ import (
 type SimpleChaincode struct {
 }
 
+
+
+type tabone struct {
+
+colone string  `json:"colOneTableOne"`
+//coltwo int32    `json:"colTwoTableOne"`
+//colthree int32   `json:"colThreeTableOne"`
+}
+
+
+
+
 // Init create tables for tests
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	// Create table one
@@ -154,57 +166,27 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		return []byte(rowString), nil
 		
 	
-	
 	case "getRowsTableOne":
-	if len(args) < 1 {
-			return nil, errors.New("getRowsTableOne failed. Must include at least key values")
-		}
 		
 		var columns []shim.Column
-		col1Val := args[0]
-		col1 := shim.Column{Value: &shim.Column_String_{String_: col1Val}}
-		columns = append(columns, col1)
-	if len(args) > 1 {
-			col2Int, err := strconv.ParseInt(args[1], 10, 32)
-			if err != nil {
-				return nil, errors.New("getRowsTableTwo failed. arg[1] must be convertable to int32")
-			}
-
-     col2Val := int32(col2Int)
-			col2 := shim.Column{Value: &shim.Column_Int32{Int32: col2Val}}
-			columns = append(columns, col2)
-
-         }
-
-         rowChannel, err := stub.GetRows("tableOne", columns)
-
-        if err != nil {
-			return nil, fmt.Errorf("getRowsTableTwo operation failed. %s", err)
-		}		 
+		rows, err := stub.GetRows("tableOne", columns)
+		if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve row")
+	}
+	
+	res2E:= []*tabone{}
+	
+	for row := range rows {
+		newApp:= new(tabone)
+		newApp.colone = row.Columns[0].GetString_()
+		//newApp.coltwo = int(row.Columns[1].GetInt32_())
+		//newApp.colthree =int(row.Columns[2].GetInt32_())
 		
-		var rows []shim.Row
-		for {
-			select {
-			case row, ok := <-rowChannel:
-				if !ok {
-					rowChannel = nil
-				} else {
-					rows = append(rows, row)
-				}
-			}
-			if rowChannel == nil {
-				break
-			}
-		}
-      jsonRows, err := json.Marshal(rows)
-	  if err != nil {
-			return nil, fmt.Errorf("getRowsTableTwo operation failed. Error marshaling JSON: %s", err)
-		}
 		
-		return jsonRows, nil
-		
-
-		
+		res2E=append(res2E,newApp)
+	}
+	res2F, _ := json.Marshal(res2E)
+	return res2F, nil
 		
 	default:
 		return nil, errors.New("Unsupported operation")
