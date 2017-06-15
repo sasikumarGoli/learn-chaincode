@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
+	//"strconv"
       s "strings"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -21,8 +21,8 @@ type SimpleChaincode struct {
 type tabone struct {
 
 colone string  `json:"colOneTableOne"`
-//coltwo int32    `json:"colTwoTableOne"`
-//colthree int32   `json:"colThreeTableOne"`
+coltwo string    `json:"colTwoTableOne"`
+colthree string   `json:"colThreeTableOne"`
 }
 
 
@@ -58,21 +58,20 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		
 		
 		col1Val := str[0]
-		col2Int, err := strconv.ParseInt(str[1], 10, 32)
-		if err != nil {
-			return nil, errors.New("insertTableOne failed. arg[1] must be convertable to int32")
-		}
-		col2Val := int32(col2Int)
-		col3Int, err := strconv.ParseInt(str[2], 10, 32)
-		if err != nil {
-			return nil, errors.New("insertTableOne failed. arg[2] must be convertable to int32")
-		}
-		col3Val := int32(col3Int)
+		//col2Int, err := strconv.ParseInt(str[1], 10, 32)
+		col2Val :=str[1]
+		col3Val := str[2]
+		
+		
+	//	col2Val := int32(col2Int)
+	//	col3Int, err := strconv.ParseInt(str[2], 10, 32)
+		
+		//col3Val := int32(col3Int)
 
 		var columns []*shim.Column
 		col1 := shim.Column{Value: &shim.Column_String_{String_: col1Val}}
-		col2 := shim.Column{Value: &shim.Column_Int32{Int32: col2Val}}
-		col3 := shim.Column{Value: &shim.Column_Int32{Int32: col3Val}}
+		col2 := shim.Column{Value: &shim.Column_String_{String_: col2Val}}
+		col3 := shim.Column{Value: &shim.Column_String_{String_: col3Val}}
 		columns = append(columns, &col1)
 		columns = append(columns, &col2)
 		columns = append(columns, &col3)
@@ -89,53 +88,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	   
 	   }
 
-	case "replaceRowTableOne":
-		if len(args) < 3 {
-			return nil, errors.New("replaceRowTableOne failed. Must include 3 column values")
-		}
-
-		col1Val := args[0]
-		col2Int, err := strconv.ParseInt(args[1], 10, 32)
-		if err != nil {
-			return nil, errors.New("replaceRowTableOne failed. arg[1] must be convertable to int32")
-		}
-		col2Val := int32(col2Int)
-		col3Int, err := strconv.ParseInt(args[2], 10, 32)
-		if err != nil {
-			return nil, errors.New("replaceRowTableOne failed. arg[2] must be convertable to int32")
-		}
-		col3Val := int32(col3Int)
-
-		var columns []*shim.Column
-		col1 := shim.Column{Value: &shim.Column_String_{String_: col1Val}}
-		col2 := shim.Column{Value: &shim.Column_Int32{Int32: col2Val}}
-		col3 := shim.Column{Value: &shim.Column_Int32{Int32: col3Val}}
-		columns = append(columns, &col1)
-		columns = append(columns, &col2)
-		columns = append(columns, &col3)
-
-		row := shim.Row{Columns: columns}
-		ok, err := stub.ReplaceRow("tableOne", row)
-		if err != nil {
-			return nil, fmt.Errorf("replaceRowTableOne operation failed. %s", err)
-		}
-		if !ok {
-			return nil, errors.New("replaceRowTableOne operation failed. Row with given key does not exist")
-		}
-
-	case "deleteAndRecreateTableOne":
-
-		err := stub.DeleteTable("tableOne")
-		if err != nil {
-			return nil, fmt.Errorf("deleteAndRecreateTableOne operation failed. Error deleting table. %s", err)
-		}
-
-		err = createTableOne(stub)
-		if err != nil {
-			return nil, fmt.Errorf("deleteAndRecreateTableOne operation failed. Error creating table. %s", err)
-		}
-
-		return nil, nil
+	
+	
 
 	default:
 		return nil, errors.New("Unsupported operation")
@@ -179,9 +133,11 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	for row := range rows {
 		newApp:= new(tabone)
 		newApp.colone = row.Columns[0].GetString_()
-		//newApp.coltwo = int(row.Columns[1].GetInt32_())
-		//newApp.colthree =int(row.Columns[2].GetInt32_())
-		
+		newApp.coltwo = row.Columns[1].GetString_()
+		newApp.colthree = row.Columns[2].GetString_()
+		fmt.Println("printing test value ----"+row.Columns[0].GetString_())
+		fmt.Println("printing test value ----"+row.Columns[1].GetString_())
+		fmt.Println("printing test value ----"+row.Columns[2].GetString_())
 		
 		res2E=append(res2E,newApp)
 	}
@@ -206,9 +162,9 @@ func createTableOne(stub shim.ChaincodeStubInterface) error {
 	columnOneTableOneDef := shim.ColumnDefinition{Name: "colOneTableOne",
 		Type: shim.ColumnDefinition_STRING, Key: true}
 	columnTwoTableOneDef := shim.ColumnDefinition{Name: "colTwoTableOne",
-		Type: shim.ColumnDefinition_INT32, Key: false}
+		Type: shim.ColumnDefinition_STRING, Key: false}
 	columnThreeTableOneDef := shim.ColumnDefinition{Name: "colThreeTableOne",
-		Type: shim.ColumnDefinition_INT32, Key: false}
+		Type: shim.ColumnDefinition_STRING, Key: false}
 	columnDefsTableOne = append(columnDefsTableOne, &columnOneTableOneDef)
 	columnDefsTableOne = append(columnDefsTableOne, &columnTwoTableOneDef)
 	columnDefsTableOne = append(columnDefsTableOne, &columnThreeTableOneDef)
