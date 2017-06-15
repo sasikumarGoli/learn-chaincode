@@ -138,6 +138,9 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 		fmt.Println("printing test value ----"+row.Columns[0].GetString_())
 		fmt.Println("printing test value ----"+row.Columns[1].GetString_())
 		fmt.Println("printing test value ----"+row.Columns[2].GetString_())
+		fmt.Println("printing test value *****"+newApp.colone)
+		fmt.Println("printing test value *****"+newApp.coltwo)
+		fmt.Println("printing test value *******"+newApp.colthree)
 		
 		res2E=append(res2E,newApp)
 	}
