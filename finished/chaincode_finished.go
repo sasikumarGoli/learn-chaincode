@@ -20,9 +20,12 @@ type SimpleChaincode struct {
 
 type tabone struct {
 
-ColOneTableOne string  `json:"colOneTableOne"`
-ColTwoTableOne string    `json:"colTwoTableOne"`
-ColThreeTableOne string   `json:"colThreeTableOne"`
+vehicleId string       `json:"VehicleId"`
+vehicleMake string     `json:"VehicleMake"`
+vehicleModel string    `json:"VehicleModel"`
+vehicleColour string   `json:"VehicleColour"`
+vehicleReg string      `json:"vehicleReg"`
+vehicleOwner string    `json:"VehicleOwner"`
 }
 
 
@@ -61,6 +64,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		//col2Int, err := strconv.ParseInt(str[1], 10, 32)
 		col2Val :=str[1]
 		col3Val := str[2]
+		col4Val := str[3]
+		col5Val := str[4]
+		col6Val := str[5]
 		
 		
 	//	col2Val := int32(col2Int)
@@ -72,9 +78,15 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		col1 := shim.Column{Value: &shim.Column_String_{String_: col1Val}}
 		col2 := shim.Column{Value: &shim.Column_String_{String_: col2Val}}
 		col3 := shim.Column{Value: &shim.Column_String_{String_: col3Val}}
+		col4 := shim.Column{Value: &shim.Column_String_{String_: col4Val}}
+        col5 := shim.Column{Value: &shim.Column_String_{String_: col5Val}}
+        col6 := shim.Column{Value: &shim.Column_String_{String_: col6Val}}  		
 		columns = append(columns, &col1)
 		columns = append(columns, &col2)
 		columns = append(columns, &col3)
+		columns = append(columns, &col4)
+		columns = append(columns, &col5)
+		columns = append(columns, &col6)
 
 		row := shim.Row{Columns: columns}
 		ok, err := stub.InsertRow("tableOne", row)
@@ -132,15 +144,22 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	
 	for row := range rows {
 		newApp:= new(tabone)
-		newApp.ColOneTableOne = row.Columns[0].GetString_()
-		newApp.ColTwoTableOne = row.Columns[1].GetString_()
-		newApp.ColThreeTableOne = row.Columns[2].GetString_()
+		newApp.vehicleId = row.Columns[0].GetString_()
+		newApp.vehicleMake = row.Columns[1].GetString_()
+		newApp.vehicleModel = row.Columns[2].GetString_()
+		newApp.vehicleColour = row.Columns[3].GetString_()
+		newApp.vehicleReg = row.Columns[4].GetString_()
+		newApp.vehicleOwner = row.Columns[5].GetString_()
+		
+		
+		
+		
 		fmt.Println("printing test value ----"+row.Columns[0].GetString_())
 		fmt.Println("printing test value ----"+row.Columns[1].GetString_())
 		fmt.Println("printing test value ----"+row.Columns[2].GetString_())
-		fmt.Println("printing test value *****"+newApp.ColOneTableOne)
-		fmt.Println("printing test value *****"+newApp.ColTwoTableOne)
-		fmt.Println("printing test value *******"+newApp.ColThreeTableOne)
+		//fmt.Println("printing test value *****"+newApp.ColOneTableOne)
+		//fmt.Println("printing test value *****"+newApp.ColTwoTableOne)
+		//fmt.Println("printing test value *******"+newApp.ColThreeTableOne)
 		
 		res2E=append(res2E,newApp)
 		
@@ -165,15 +184,38 @@ func main() {
 func createTableOne(stub shim.ChaincodeStubInterface) error {
 	// Create table one
 	var columnDefsTableOne []*shim.ColumnDefinition
-	columnOneTableOneDef := shim.ColumnDefinition{Name: "colOneTableOne",
+	columnOneTableOneDef := shim.ColumnDefinition{Name: "VehicleId",
 		Type: shim.ColumnDefinition_STRING, Key: true}
-	columnTwoTableOneDef := shim.ColumnDefinition{Name: "colTwoTableOne",
+	columnTwoTableOneDef := shim.ColumnDefinition{Name: "VehicleMake",
 		Type: shim.ColumnDefinition_STRING, Key: false}
-	columnThreeTableOneDef := shim.ColumnDefinition{Name: "colThreeTableOne",
+	columnThreeTableOneDef := shim.ColumnDefinition{Name: "VehicleModel",
 		Type: shim.ColumnDefinition_STRING, Key: false}
+	
+	columnFourTableOneDef := shim.ColumnDefinition{Name: "VehicleColour",
+		Type: shim.ColumnDefinition_STRING, Key: false}
+		
+	columnFiveTableOneDef := shim.ColumnDefinition{Name: "VehicleReg",
+		Type: shim.ColumnDefinition_STRING, Key: false}	
+		
+	columnSixTableOneDef := shim.ColumnDefinition{Name: "VehicleOwner",
+		Type: shim.ColumnDefinition_STRING, Key: false}	
+	
+	
+	
+	
 	columnDefsTableOne = append(columnDefsTableOne, &columnOneTableOneDef)
 	columnDefsTableOne = append(columnDefsTableOne, &columnTwoTableOneDef)
 	columnDefsTableOne = append(columnDefsTableOne, &columnThreeTableOneDef)
+	columnDefsTableOne = append(columnDefsTableOne, &columnFourTableOneDef)
+	columnDefsTableOne = append(columnDefsTableOne, &columnFiveTableOneDef)
+	columnDefsTableOne = append(columnDefsTableOne, &columnSixTableOneDef)
+	
+	
+	
+	
+	
 	return stub.CreateTable("tableOne", columnDefsTableOne)
+	
+	
 }
 
