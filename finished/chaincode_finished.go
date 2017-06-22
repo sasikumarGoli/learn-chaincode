@@ -20,12 +20,12 @@ type SimpleChaincode struct {
 
 type tabone struct {
 
-vehicleId string       `json:"VehicleId"`
-vehicleMake string     `json:"VehicleMake"`
-vehicleModel string    `json:"VehicleModel"`
-vehicleColour string   `json:"VehicleColour"`
-vehicleReg string      `json:"vehicleReg"`
-vehicleOwner string    `json:"VehicleOwner"`
+VehicleId string       `json:"vehicleId"`
+VehicleMake string     `json:"vehicleMake"`
+VehicleModel string    `json:"vehicleModel"`
+VehicleColour string   `json:"vehicleColour"`
+VehicleReg string      `json:"vehicleReg"`
+VehicleOwner string    `json:"vehicleOwner"`
 }
 
 
@@ -144,12 +144,12 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	
 	for row := range rows {
 		newApp:= new(tabone)
-		newApp.vehicleId = row.Columns[0].GetString_()
-		newApp.vehicleMake = row.Columns[1].GetString_()
-		newApp.vehicleModel = row.Columns[2].GetString_()
-		newApp.vehicleColour = row.Columns[3].GetString_()
-		newApp.vehicleReg = row.Columns[4].GetString_()
-		newApp.vehicleOwner = row.Columns[5].GetString_()
+		newApp.VehicleId = row.Columns[0].GetString_()
+		newApp.VehicleMake = row.Columns[1].GetString_()
+		newApp.VehicleModel = row.Columns[2].GetString_()
+		newApp.VehicleColour = row.Columns[3].GetString_()
+		newApp.VehicleReg = row.Columns[4].GetString_()
+		newApp.VehicleOwner = row.Columns[5].GetString_()
 		
 		
 		
