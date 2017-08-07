@@ -26,6 +26,17 @@ VehicleModel string    `json:"vehicleModel"`
 VehicleColour string   `json:"vehicleColour"`
 VehicleReg string      `json:"vehicleReg"`
 VehicleOwner string    `json:"vehicleOwner"`
+
+//addes by Reshma
+AuctionID string       `json:"AuctionID"`
+SaleYear string        `json:"SaleYear"`
+SaleNo string          `json:"SaleNo"`
+LaneNo string          `json:"LaneNo"`
+RunNo   string         `json:"RunNo"`
+PaymentMode string     `json:"PaymentMode"`
+VehicleStatus string   `json:"VehicleStatus"`
+TitleStatus string     `json:"TitleStatus"`
+
 }
 
 
@@ -39,6 +50,11 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 		return nil, fmt.Errorf("Error creating table one during init. %s", err)
 	}
 
+	//added by Reshma
+	err2 := createTableTwo(stub)
+	if err2 != nil {
+		return nil, fmt.Errorf("Error creating table one during init. %s", err2)
+	}
 	
 
 	return nil, nil
@@ -79,8 +95,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		col2 := shim.Column{Value: &shim.Column_String_{String_: col2Val}}
 		col3 := shim.Column{Value: &shim.Column_String_{String_: col3Val}}
 		col4 := shim.Column{Value: &shim.Column_String_{String_: col4Val}}
-        col5 := shim.Column{Value: &shim.Column_String_{String_: col5Val}}
-        col6 := shim.Column{Value: &shim.Column_String_{String_: col6Val}}  		
+	        col5 := shim.Column{Value: &shim.Column_String_{String_: col5Val}}
+		col6 := shim.Column{Value: &shim.Column_String_{String_: col6Val}}  		
 		columns = append(columns, &col1)
 		columns = append(columns, &col2)
 		columns = append(columns, &col3)
@@ -100,8 +116,83 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	   
 	   }
 
+
+//start of table twoinsnertion by Reshma
+	   case "insertRowTableTwo":
+		if len(args) < 3 {
+			return nil, errors.New("insertTableOne failed. Must include 3 column values")
+		}
+	     var str [] string
+
+		for i := 0; i < len(args); i++ {
+		
+		str = s.Split(args[i],"-")
+		
+		
+		col1Val := str[0]
+		col2Val :=str[1]
+		col3Val := str[2]
+		col4Val := str[3]
+		col5Val := str[4]
+		col6Val := str[5]
+		col7Val := str[6]
+		col8Val := str[7]
+		col9Val := str[8]
+		col10Val := str[9]
+		col11Val := str[10]
+		col12Val := str[11]
+		col13Val := str[12]
+		col14Val := str[13]
+		col15Val := str[14]
+
+		var columns []*shim.Column
+		col1 := shim.Column{Value: &shim.Column_String_{String_: col1Val}}
+		col2 := shim.Column{Value: &shim.Column_String_{String_: col2Val}}
+		col3 := shim.Column{Value: &shim.Column_String_{String_: col3Val}}
+		col4 := shim.Column{Value: &shim.Column_String_{String_: col4Val}}
+	        col5 := shim.Column{Value: &shim.Column_String_{String_: col5Val}}
+		col6 := shim.Column{Value: &shim.Column_String_{String_: col6Val}}  		
+		col7 := shim.Column{Value: &shim.Column_String_{String_: col7Val}}  		
+		col8 := shim.Column{Value: &shim.Column_String_{String_: col8Val}}  		
+		col9 := shim.Column{Value: &shim.Column_String_{String_: col9Val}}  		
+		col10 := shim.Column{Value: &shim.Column_String_{String_: col10Val}}  		
+		col11 := shim.Column{Value: &shim.Column_String_{String_: col11Val}}  		
+		col12 := shim.Column{Value: &shim.Column_String_{String_: col12Val}}  		
+		col13 := shim.Column{Value: &shim.Column_String_{String_: col13Val}}  		
+		col14 := shim.Column{Value: &shim.Column_String_{String_: col14Val}}  		
+		col15 := shim.Column{Value: &shim.Column_String_{String_: col15Val}}  		
+
+		columns = append(columns, &col1)
+		columns = append(columns, &col2)
+		columns = append(columns, &col3)
+		columns = append(columns, &col4)
+		columns = append(columns, &col5)
+		columns = append(columns, &col6)
+		columns = append(columns, &col7)
+		columns = append(columns, &col8)
+		columns = append(columns, &col9)
+		columns = append(columns, &col10)
+		columns = append(columns, &col11)
+		columns = append(columns, &col12)
+		columns = append(columns, &col13)
+		columns = append(columns, &col14)
+		columns = append(columns, &col15)
+
+		row := shim.Row{Columns: columns}
+		ok, err2 := stub.InsertRow("tableTwo", row)
+		if err2 != nil {
+			return nil, fmt.Errorf("insertTableTwo operation failed. %s", err2)
+		}
+		if !ok {
+			return nil, errors.New("insertTableTwo operation failed. Row with given key already exists")
+		}
+       
+	   
+	   }
+
+
 	
-	
+//End of table twoinsertion by Reshma	
 
 	default:
 		return nil, errors.New("Unsupported operation")
@@ -218,4 +309,75 @@ func createTableOne(stub shim.ChaincodeStubInterface) error {
 	
 	
 }
+
+//added by Reshma
+
+func createTableTwo(stub shim.ChaincodeStubInterface) error {
+	// Create table two
+	var columnDefsTableTwo []*shim.ColumnDefinition
+
+
+	columnOneTableTwoDef := shim.ColumnDefinition{Name: "VehicleId",
+		Type: shim.ColumnDefinition_STRING, Key: true}
+	columnTwoTableTwoDef := shim.ColumnDefinition{Name: "VehicleMake",
+		Type: shim.ColumnDefinition_STRING, Key: false}
+	columnThreeTableTwoDef := shim.ColumnDefinition{Name: "VehicleModel",
+		Type: shim.ColumnDefinition_STRING, Key: false}
+	
+	columnFourTableTwoDef := shim.ColumnDefinition{Name: "VehicleColour",
+		Type: shim.ColumnDefinition_STRING, Key: false}
+		
+	columnFiveTableTwoDef := shim.ColumnDefinition{Name: "VehicleReg",
+		Type: shim.ColumnDefinition_STRING, Key: false}	
+		
+	columnSixTableTwoDef := shim.ColumnDefinition{Name: "VehicleOwner",
+		Type: shim.ColumnDefinition_STRING, Key: false}	
+
+
+	columnSevenTableTwoDef := shim.ColumnDefinition{Name: "AuctionID",
+		Type: shim.ColumnDefinition_STRING, Key: true}
+	columnEightTableTwoDef := shim.ColumnDefinition{Name: "SaleYear",
+		Type: shim.ColumnDefinition_STRING, Key: false}
+	columnNineTableTwoDef := shim.ColumnDefinition{Name: "SaleNo",
+		Type: shim.ColumnDefinition_STRING, Key: false}
+	
+	columnTenTableTwoDef := shim.ColumnDefinition{Name: "LaneNo",
+		Type: shim.ColumnDefinition_STRING, Key: false}
+		
+	columnElevenTableTwoDef := shim.ColumnDefinition{Name: "RunNo",
+		Type: shim.ColumnDefinition_STRING, Key: false}	
+		
+	columnTwelveTableTwoDef := shim.ColumnDefinition{Name: "PaymentMode",
+		Type: shim.ColumnDefinition_STRING, Key: false}	
+	
+	columnThirteenTableTwoDef := shim.ColumnDefinition{Name: "VehicleStatus",
+		Type: shim.ColumnDefinition_STRING, Key: false}	
+	columneFourteenTableTwoDef := shim.ColumnDefinition{Name: "TitleStatus",
+			Type: shim.ColumnDefinition_STRING, Key: false}	
+	
+
+	
+		
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnOneTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnTwoTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnThreeTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnFourTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnFiveTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnSixTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnSevenTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnEightTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnNineTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnTenTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnElevenTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnTwelveTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columnThirteenTableTwoDef)
+	columnDefsTableTwo = append(columnDefsTableTwo, &columneFourteenTableTwoDef)
+
+	
+	
+	return stub.CreateTable("tableTwo", columnDefsTableTwo)
+	
+	
+}
+
 
